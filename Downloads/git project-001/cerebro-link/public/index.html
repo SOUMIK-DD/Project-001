@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0f0a">
+<title>CEREBRO-LINK // HAWKINS NATIONAL LAB // 1984</title>
+<link rel="manifest" id="pwa-manifest">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --p:    #ff4d4d;
+  --pdim: #cc2222;
+  --pdk:  #4a0000;
+  --amb:  #66ff66;
+  --ambd: #228822;
+  --red:  #ff0000;
+  --redd: #660000;
+  --blue: #4466ff;
+  --yel:  #ffff00;
+  --bg:   #0a0a0a;
+  --bgp:  #111111;
+  --bgi:  #070707;
+  --glow:  0 0 8px var(--p), 0 0 20px rgba(255,77,77,.3);
+  --tglow: 0 0 6px var(--p), 0 0 16px rgba(255,77,77,.5);
+  --aglow: 0 0 6px var(--amb), 0 0 12px rgba(102,255,102,.4);
+  --rglow: 0 0 8px var(--red), 0 0 20px rgba(255,0,0,.5);
+  --fd: 'VT323', monospace;
+  --fm: 'Share Tech Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{background:var(--bg);color:var(--p);font-family:var(--fm);font-size:13px;min-height:100vh;overflow-x:hidden;cursor:crosshair}
+
+/* CHRISTMAS LIGHTS */
+#xmas-lights{position:fixed;top:0;left:0;width:100%;height:22px;display:flex;justify-content:space-around;align-items:center;z-index:9500;pointer-events:none;background:rgba(0,0,0,.6);border-bottom:1px solid #222}
+.xlight{width:12px;height:12px;border-radius:50%;position:relative;animation:lightfl 3s infinite}
+.xlight.r{background:#ff0000;box-shadow:0 0 10px #ff0000,0 0 20px #ff0000}
+.xlight.b{background:#0044ff;box-shadow:0 0 10px #0044ff,0 0 20px #0044ff;animation-delay:.4s}
+.xlight.g{background:#00ff00;box-shadow:0 0 10px #00ff00,0 0 20px #00ff00;animation-delay:.8s}
+.xlight.y{background:#ffff00;box-shadow:0 0 10px #ffff00,0 0 20px #ffff00;animation-delay:1.2s}
+.xlight.p{background:#ff00ff;box-shadow:0 0 10px #ff00ff,0 0 20px #ff00ff;animation-delay:1.6s}
+@keyframes lightfl{0%,100%{opacity:1}25%{opacity:.5}50%{opacity:.9}75%{opacity:.3}}
+
+/* STATIC OVERLAY */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,rgba(255,0,0,.025) 0px,rgba(0,0,255,.025) 2px,transparent 2px,transparent 4px);pointer-events:none;z-index:9000;animation:staticmv .4s steps(3) infinite}
+@keyframes staticmv{0%{transform:translate(0,0)}33%{transform:translate(-2px,2px)}66%{transform:translate(2px,-1px)}100%{transform:translate(0,0)}}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.85) 100%);pointer-events:none;z-index:9001}
+#crt{position:fixed;inset:0;pointer-events:none;z-index:9002;animation:crtf 6s infinite}
+@keyframes crtf{0%,95%,100%{opacity:1}96%{opacity:.8}97%{opacity:1}97.5%{opacity:.85}98%{opacity:1}}
+
+/* LAYOUT */
+#app{max-width:1400px;margin:0 auto;padding:12px;padding-top:30px;display:grid;grid-template-rows:auto auto 1fr;gap:10px;min-height:100vh}
+
+/* HEADER */
+#hdr{border:2px solid var(--pdim);box-shadow:0 0 20px rgba(255,0,0,.4),inset 0 0 30px rgba(255,0,0,.05);padding:10px 20px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:var(--bgp);position:relative;overflow:hidden}
+#hdr::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);animation:scanbar 3s linear infinite}
+@keyframes scanbar{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.hl{font-size:11px;color:var(--pdim)}.hl span{display:block}
+.hc{text-align:center}
+.hc h1{font-family:var(--fd);font-size:42px;letter-spacing:8px;text-shadow:var(--tglow);color:var(--p);animation:tfl 8s infinite}
+@keyframes tfl{0%,88%,100%{opacity:1;text-shadow:var(--tglow)}89%{opacity:.6;text-shadow:none}90%{opacity:1}91%{opacity:.75}92%{opacity:1}}
+.hsub{font-size:10px;color:var(--pdim);letter-spacing:3px;margin-top:2px}
+.hr{text-align:right;font-size:11px;color:var(--pdim)}
+#clock{font-family:var(--fd);font-size:22px;color:var(--amb);text-shadow:var(--aglow);letter-spacing:2px}
+#cstat{display:inline-flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1px;margin-top:4px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--pdk);animation:pslow 2s ease-in-out infinite}
+.dot.connected{background:var(--amb);box-shadow:0 0 8px var(--amb)}
+.dot.connecting{background:var(--p);box-shadow:0 0 8px var(--p);animation:pfast .5s ease-in-out infinite}
+.dot.error{background:var(--red);box-shadow:0 0 8px var(--red)}
+@keyframes pslow{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes pfast{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* STATUS BAR */
+#sbar{display:flex;gap:10px;align-items:center;padding:6px 14px;border:1px solid var(--pdk);border-color:#2a0000;background:var(--bgi);font-size:11px;color:var(--pdim);letter-spacing:1px;box-shadow:0 0 10px rgba(255,0,0,.1)}
+.seg{display:flex;align-items:center;gap:6px;padding:0 10px;border-right:1px solid var(--pdk)}
+.seg:last-child{border-right:none;margin-left:auto}
+.sv{color:var(--p)}
+
+/* MAIN GRID */
+#mg{display:grid;grid-template-columns:380px 1fr 320px;grid-template-rows:auto auto;gap:10px}
+#p-hs{grid-column:1;grid-row:1/3}
+#p-xf{grid-column:2;grid-row:1}
+#p-cr{grid-column:3;grid-row:1/3}
+#p-log{grid-column:2;grid-row:2}
+
+/* PANELS */
+.panel{border:2px solid var(--pdim);background:var(--bgp);box-shadow:inset 0 0 30px rgba(0,0,0,.7),0 0 15px rgba(255,0,0,.15);position:relative;overflow:hidden}
+.panel::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,77,77,.03),transparent);pointer-events:none}
+.ph{padding:8px 14px;border-bottom:2px solid var(--pdk);display:flex;align-items:center;gap:10px;background:rgba(255,0,0,.06)}
+.ph h2{font-family:var(--fd);font-size:20px;letter-spacing:3px;text-shadow:var(--tglow);flex:1;color:var(--p)}
+.ptag{font-size:9px;color:var(--pdk);border:1px solid var(--pdk);padding:1px 5px;letter-spacing:1px}
+.pb{padding:14px}
+
+/* FORM */
+.fg{margin-bottom:14px}
+.fl{display:block;font-size:10px;color:var(--pdim);letter-spacing:2px;margin-bottom:5px;text-transform:uppercase}
+.fi{width:100%;background:var(--bgi);border:1px solid var(--pdk);color:var(--p);font-family:var(--fm);font-size:12px;padding:7px 10px;outline:none;transition:border-color .2s,box-shadow .2s;caret-color:var(--p)}
+.fi:focus{border-color:var(--p);box-shadow:0 0 8px rgba(255,77,77,.3)}
+.fi::placeholder{color:var(--pdk)}
+textarea.fi{resize:vertical;min-height:70px;font-size:10px;line-height:1.4}
+
+/* BUTTONS */
+.btn{font-family:var(--fm);font-size:11px;letter-spacing:2px;padding:8px 16px;border:1px solid;cursor:pointer;text-transform:uppercase;transition:all .15s;background:transparent;position:relative;overflow:hidden}
+.btn::before{content:'';position:absolute;inset:0;background:currentColor;opacity:0;transition:opacity .15s}
+.btn:hover::before{opacity:.1}
+.btn-g{color:var(--p);border-color:var(--p);box-shadow:0 0 6px rgba(255,77,77,.2)}
+.btn-g:hover{box-shadow:var(--glow);text-shadow:var(--tglow)}
+.btn-a{color:var(--amb);border-color:var(--amb);box-shadow:0 0 6px rgba(102,255,102,.2)}
+.btn-r{color:var(--red);border-color:var(--red);box-shadow:0 0 6px rgba(255,0,0,.2)}
+.btn-w{width:100%;display:block;text-align:center}
+.btn-sm{padding:5px 10px;font-size:10px}
+.brow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* HANDSHAKE */
+.mtabs{display:flex;border-bottom:1px solid var(--pdk);margin-bottom:14px}
+.mtab{flex:1;padding:6px;text-align:center;font-size:10px;letter-spacing:1px;cursor:pointer;color:var(--pdim);border-bottom:2px solid transparent;transition:all .2s}
+.mtab.active{color:var(--p);border-bottom-color:var(--p);text-shadow:var(--tglow)}
+.mpane{display:none}.mpane.active{display:block}
+.sdpbox{background:var(--bgi);border:1px solid var(--pdk);padding:8px;font-size:9px;word-break:break-all;max-height:80px;overflow-y:auto;color:var(--pdim);margin-bottom:8px;line-height:1.5;font-family:var(--fm)}
+.sdpbox::-webkit-scrollbar{width:4px}.sdpbox::-webkit-scrollbar-thumb{background:var(--pdk)}
+.cstep{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--pdk)}
+.cstep:last-child{border-bottom:none}
+.csnum{font-family:var(--fd);font-size:24px;color:var(--pdk);line-height:1;min-width:20px}
+.cst{font-size:11px;color:var(--p);letter-spacing:1px;margin-bottom:4px}
+.csd{font-size:10px;color:var(--pdim)}
+#qrdisplay{background:#fff;padding:10px;display:flex;justify-content:center;margin-bottom:10px}
+#qrsc{width:100%;border:1px solid var(--pdk);margin-bottom:10px;background:var(--bgi)}
+
+/* FILE TRANSFER */
+#dropz{border:2px dashed var(--pdk);padding:24px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px}
+#dropz:hover,#dropz.dragover{border-color:var(--p);box-shadow:inset 0 0 20px rgba(0,255,65,.05)}
+.dico{font-family:var(--fd);font-size:40px;color:var(--pdk);display:block;margin-bottom:8px;transition:color .2s}
+#dropz:hover .dico{color:var(--pdim)}
+#dropz p{font-size:11px;color:var(--pdim);letter-spacing:1px}
+.dsub{font-size:9px;color:var(--pdk);margin-top:4px}
+#filein{display:none}
+#fqueue{max-height:140px;overflow-y:auto;margin-bottom:14px}
+#fqueue::-webkit-scrollbar{width:4px}
+.fitem{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--pdk);margin-bottom:4px;background:var(--bgi)}
+.fico{font-size:18px;font-family:var(--fd);color:var(--pdim)}
+.finfo{flex:1}
+.fname{font-size:11px;color:var(--p);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.fsize{font-size:9px;color:var(--pdk)}
+.frem{cursor:pointer;color:var(--red);font-size:14px;opacity:.6}
+.frem:hover{opacity:1}
+
+/* NIXIE PROGRESS */
+#progwrap{margin-bottom:14px}
+.plbl{display:flex;justify-content:space-between;font-size:10px;color:var(--pdim);margin-bottom:6px}
+#ppct{font-family:var(--fd);font-size:18px;color:var(--p);text-shadow:var(--tglow)}
+.nixbar{height:24px;background:var(--bgi);border:1px solid var(--pdk);position:relative;overflow:hidden}
+.nixfill{height:100%;background:linear-gradient(90deg,var(--pdk),var(--p));box-shadow:4px 0 12px var(--p);transition:width .3s;width:0%;position:relative}
+.nixfill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;background:var(--p);animation:ng .5s ease-in-out infinite alternate}
+@keyframes ng{from{opacity:.6}to{opacity:1;box-shadow:0 0 15px var(--p),0 0 30px var(--p)}}
+.nixsegs{position:absolute;inset:0;display:flex}
+.nixseg{flex:1;border-right:1px solid rgba(0,0,0,.4)}
+.nixtxt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fd);font-size:14px;color:rgba(255,77,77,.7);letter-spacing:2px;mix-blend-mode:screen}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:14px}
+.stbox{border:1px solid var(--pdk);padding:8px;text-align:center;background:var(--bgi)}
+.stval{font-family:var(--fd);font-size:20px;color:var(--p);text-shadow:var(--tglow);display:block}
+.stkey{font-size:9px;color:var(--pdk);letter-spacing:1px;text-transform:uppercase}
+#recvd{max-height:120px;overflow-y:auto}
+.ritem{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--pdk);margin-bottom:4px;background:var(--bgi);cursor:pointer;transition:border-color .2s}
+.ritem:hover{border-color:var(--p)}
+.riname{flex:1;font-size:11px;color:var(--p)}
+.risize{font-size:9px;color:var(--pdim)}
+
+/* CRYPTO */
+.freqbox{text-align:center;padding:14px;border:2px solid var(--redd);margin-bottom:10px;background:var(--bgi);box-shadow:0 0 15px rgba(255,0,0,.1)}
+.freqval{font-family:var(--fd);font-size:42px;color:var(--p);text-shadow:var(--tglow);letter-spacing:4px;display:block}
+.frequnt{font-size:10px;color:var(--pdim);letter-spacing:2px}
+.keyvis{background:var(--bgi);border:1px solid var(--pdk);padding:10px;margin-bottom:10px;text-align:center}
+.keybars{display:flex;gap:2px;height:20px;margin-bottom:8px}
+.keybar{flex:1;background:var(--pdk);align-self:flex-end}
+.keyhex{font-family:var(--fm);font-size:9px;color:var(--pdim);word-break:break-all;line-height:1.6}
+.cdisp{background:var(--bgi);border:1px solid var(--pdk);padding:10px;margin-bottom:10px;font-size:9px;font-family:var(--fm);color:var(--pdim)}
+.crow{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--pdk)}
+.crow:last-child{border-bottom:none}
+.ck{color:var(--pdk)}
+.cv{font-family:var(--fd);font-size:14px}
+.cv.ok{color:var(--amb)}
+.cv.warn{color:var(--p);text-shadow:var(--tglow)}
+.cv.err{color:var(--red)}
+
+/* KILL SWITCH */
+#kszone{border:2px solid var(--redd);padding:12px;background:rgba(255,34,0,.03);margin-top:10px}
+#kszone h3{font-family:var(--fd);font-size:18px;color:var(--red);text-shadow:var(--rglow);letter-spacing:3px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+#kszone p{font-size:10px;color:var(--red);opacity:.7;margin-bottom:10px;line-height:1.5}
+#btnks{font-family:var(--fd);font-size:18px;letter-spacing:3px;width:100%;padding:10px;border:2px solid var(--red);background:transparent;color:var(--red);cursor:pointer;text-shadow:var(--rglow);transition:all .2s}
+#btnks:hover{animation:ksp .5s ease-in-out infinite alternate}
+@keyframes ksp{from{box-shadow:0 0 10px rgba(255,34,0,.3)}to{box-shadow:0 0 25px rgba(255,34,0,.7),0 0 50px rgba(255,34,0,.3)}}
+
+/* TERMINAL */
+#termout{background:var(--bgi);border:1px solid var(--pdk);height:200px;overflow-y:auto;padding:8px 10px;font-size:11px;line-height:1.7;font-family:var(--fm)}
+#termout::-webkit-scrollbar{width:4px}
+#termout::-webkit-scrollbar-thumb{background:var(--pdk)}
+.ll{display:flex;gap:8px}
+.lt{color:var(--pdk);min-width:55px;flex-shrink:0}
+.lg{min-width:50px;flex-shrink:0;font-weight:bold}
+.lg.info{color:var(--p)}.lg.warn{color:var(--amb)}.lg.error{color:var(--red)}.lg.crypto{color:#ff88ff}.lg.system{color:var(--pdim)}.lg.transfer{color:var(--pdim)}
+.lm{color:var(--pdim);flex:1}
+.cblink{display:inline-block;width:8px;height:12px;background:var(--p);animation:cb 1s step-end infinite;vertical-align:middle}
+@keyframes cb{0%,100%{opacity:1}50%{opacity:0}}
+
+/* PANIC */
+#panic{position:fixed;inset:0;background:rgba(255,0,0,.08);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column}
+#panic.active{display:flex}
+.ptxt{font-family:var(--fd);font-size:60px;color:var(--red);text-shadow:var(--rglow);letter-spacing:8px;animation:pfl .2s ease-in-out infinite}
+@keyframes pfl{0%,100%{opacity:1}50%{opacity:.3}}
+.psub{font-size:14px;color:var(--red);letter-spacing:3px;margin-top:20px}
+
+/* DEMOGORGON ALERT */
+#demogorgon-alert{position:fixed;top:30px;right:20px;background:#000;border:3px solid var(--red);padding:14px 20px;color:var(--red);font-family:var(--fd);font-size:20px;text-align:center;z-index:9800;display:none;letter-spacing:2px;box-shadow:var(--rglow),0 0 40px rgba(255,0,0,.3);animation:demoShk .4s infinite}
+#demogorgon-alert.show{display:block}
+@keyframes demoShk{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,3px)}75%{transform:translate(3px,-3px)}}
+
+/* UTIL */
+.divider{border:none;border-top:1px solid var(--pdk);margin:12px 0}
+.stitle{font-size:10px;color:var(--pdim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.stitle::after{content:'';flex:1;height:1px;background:var(--pdk)}
+.badge{display:inline-block;font-size:9px;padding:1px 6px;border:1px solid;letter-spacing:1px}
+.bg{color:var(--p);border-color:var(--p)}.ba{color:var(--amb);border-color:var(--amb)}
+.hidden{display:none!important}
+#scopecv{width:100%;height:50px;border:1px solid var(--pdk);background:var(--bgi);display:block;margin-bottom:10px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bgi)}::-webkit-scrollbar-thumb{background:var(--pdk)}
+::selection{background:var(--p);color:var(--bg)}
+@media(max-width:1100px){#mg{grid-template-columns:340px 1fr}#p-cr{grid-column:1/3;grid-row:3}}
+</style>
+</head>
+<body>
+<div id="crt"></div>
+
+<!-- CHRISTMAS LIGHTS -->
+<div id="xmas-lights">
+  <div class="xlight r"></div><div class="xlight b"></div><div class="xlight g"></div><div class="xlight y"></div><div class="xlight p"></div>
+  <div class="xlight r"></div><div class="xlight b"></div><div class="xlight g"></div><div class="xlight y"></div><div class="xlight p"></div>
+  <div class="xlight r"></div><div class="xlight b"></div><div class="xlight g"></div><div class="xlight y"></div><div class="xlight p"></div>
+  <div class="xlight r"></div><div class="xlight b"></div><div class="xlight g"></div><div class="xlight y"></div><div class="xlight p"></div>
+  <div class="xlight r"></div><div class="xlight b"></div><div class="xlight g"></div><div class="xlight y"></div><div class="xlight p"></div>
+  <div class="xlight r"></div><div class="xlight b"></div><div class="xlight g"></div><div class="xlight y"></div><div class="xlight p"></div>
+</div>
+
+<!-- DEMOGORGON ALERT -->
+<div id="demogorgon-alert">⚠ DEMOGORGON DETECTED ⚠<br><span style="font-size:.6em">(probably)</span></div>
+
+<div id="app">
+
+<!-- HEADER -->
+<header id="hdr">
+  <div class="hl"><span style="color:var(--p);text-shadow:var(--tglow)">HAWKINS NATIONAL LABORATORY</span><span>DEPT. OF ENERGY // CLASSIFIED</span><span>TERMINAL: <span id="tid">HNL-???</span></span></div>
+  <div class="hc">
+    <h1>PROJECT-001</h1>
+    <div class="hsub" style="color:var(--pdim)">CEREBRO-LINK // UPSIDE DOWN PROTOCOL // AES-256-GCM</div>
+  </div>
+  <div class="hr">
+    <div id="clock">--:--:--</div>
+    <div id="cstat"><span class="dot" id="cdot"></span><span id="clbl">AWAITING HANDSHAKE</span></div>
+    <div style="margin-top:4px"><span class="badge ba" id="pwabadge">PWA: OFFLINE</span></div>
+  </div>
+</header>
+
+<!-- STATUS BAR -->
+<div id="sbar">
+  <div class="seg"><span style="color:var(--pdim)">MODE:</span><span class="sv" id="smode">IDLE</span></div>
+  <div class="seg"><span style="color:var(--pdim)">PEER:</span><span class="sv" id="speer">NONE</span></div>
+  <div class="seg"><span style="color:var(--pdim)">CHANNEL:</span><span class="sv" id="schan">CLOSED</span></div>
+  <div class="seg"><span style="color:var(--pdim)">ENCRYPTION:</span><span class="sv" id="scryp">INACTIVE</span></div>
+  <div class="seg"><span style="color:var(--pdim)">TRANSFERS:</span><span class="sv" id="sxfr">0</span></div>
+  <div class="seg"><button class="btn btn-sm btn-a" id="btnaudio">🔊 AUDIO: ON</button></div>
+</div>
+
+<!-- MAIN GRID -->
+<div id="mg">
+
+  <!-- HIVEMIND -->
+  <div class="panel" id="p-hs">
+    <div class="ph"><h2>HIVEMIND</h2><span class="ptag">AUTO-SIGNAL</span><span class="ptag">LAN P2P</span></div>
+    <div class="pb">
+
+      <!-- SERVER URL -->
+      <div class="fg">
+        <label class="fl">SIGNALING SERVER (run server.js first)</label>
+        <div style="display:flex;gap:6px">
+          <input class="fi" id="srvurl" value="ws://localhost:3742" style="flex:1" placeholder="ws://192.168.x.x:3742">
+          <button class="btn btn-g btn-sm" onclick="connectSignal()">⚡ LINK</button>
+        </div>
+      </div>
+
+      <!-- SIGNAL STATUS -->
+      <div id="sigbox" style="background:var(--bgi);border:1px solid var(--pdk);padding:10px;margin-bottom:14px;font-size:11px;letter-spacing:1px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="color:var(--pdim)">SIGNAL NODE:</span>
+          <span id="siglbl" style="color:var(--red)">DISCONNECTED</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <span style="color:var(--pdim)">PEERS IN ROOM:</span>
+          <span id="sigpeers" style="color:var(--pdim)">—</span>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ROOM CODE -->
+      <div class="fg">
+        <label class="fl">ROOM CODE — type same code on BOTH laptops</label>
+        <div style="display:flex;gap:6px">
+          <input class="fi" id="roomcode" maxlength="8" placeholder="e.g. ELEVEN" style="flex:1;font-family:var(--fd);font-size:20px;letter-spacing:4px;text-transform:uppercase">
+          <button class="btn btn-g btn-sm" id="btnJoin" onclick="joinRoom()" disabled>📡 JOIN</button>
+        </div>
+        <div style="font-size:9px;color:var(--pdk);margin-top:4px;letter-spacing:1px">ANY CODE WORKS — MUST MATCH ON BOTH DEVICES</div>
+      </div>
+
+      <!-- ROOM STATUS display -->
+      <div id="roombox" style="background:var(--bgi);border:1px solid var(--pdk);padding:10px;margin-bottom:14px;font-size:11px;letter-spacing:1px;display:none">
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--pdim)">ROOM:</span><span id="roomlbl" style="color:var(--p)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span style="color:var(--pdim)">MY ROLE:</span><span id="rolelbl" style="color:var(--amb)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px">
+          <span style="color:var(--pdim)">PEER STATUS:</span><span id="peerstatuslbl" style="color:var(--red)">WAITING...</span>
+        </div>
+        <button class="btn btn-r btn-sm btn-w" style="margin-top:8px" onclick="leaveRoom()">✕ LEAVE ROOM</button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- STEPS -->
+      <div>
+        <div class="cstep"><div class="csnum" id="s1n">1</div><div><div class="cst">SHARED PASSPHRASE</div><div class="csd">Set encryption key in CEREBRO panel</div></div></div>
+        <div class="cstep"><div class="csnum" id="s2n">2</div><div><div class="cst">LINK TO SERVER</div><div class="csd">Enter server IP and click LINK</div></div></div>
+        <div class="cstep"><div class="csnum" id="s3n">3</div><div><div class="cst">JOIN SAME ROOM</div><div class="csd">Both laptops enter identical room code</div></div></div>
+        <div class="cstep"><div class="csnum" id="s4n">4</div><div><div class="cst">TRANSMIT FILES</div><div class="csd">P2P data channel opens automatically</div></div></div>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ARCH tab -->
+      <div>
+        <div class="stitle">ARCHITECTURE</div>
+        <pre style="background:var(--bgi);border:1px solid var(--pdk);padding:10px;font-size:9px;line-height:1.9;color:var(--pdim);white-space:pre-wrap">[LAPTOP A]    [server.js]    [LAPTOP B]
+    │               │               │
+    ├─ join(code) ──►│               │
+    │               │◄─ join(code) ─┤
+    │               ├─ peer-joined ─►│
+    │◄─ peer-joined─┤               │
+    ├── offer ──────►── offer ──────►│
+    │◄──────── answer ◄──── answer ──┤
+    ├──────────── ICE candidates ────►│
+    ╠═══════════ RTCDataChannel ══════╣
+    ╚═══════════ AES-256-GCM ═════════╝
+  (signaling only — file data is P2P)</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILE TRANSFER -->
+  <div class="panel" id="p-xf">
+    <div class="ph"><h2>FILE TRANSFER</h2><span class="ptag">AES-GCM</span><span class="ptag">CHUNKED</span></div>
+    <div class="pb">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div>
+          <div class="stitle">OUTBOUND SIGNAL</div>
+          <div id="dropz" onclick="document.getElementById('filein').click()"
+               ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+            <span class="dico">⬡</span>
+            <p>DROP FILE OR CLICK TO SELECT</p>
+            <p class="dsub">ANY FILE TYPE // CHUNKED TRANSFER</p>
+          </div>
+          <input type="file" id="filein" multiple onchange="handleFileSelect(event)">
+          <div id="fqueue"></div>
+          <div class="brow">
+            <button class="btn btn-g" onclick="sendFiles()" style="flex:1">⚡ TRANSMIT</button>
+            <button class="btn btn-sm btn-r" onclick="clearQueue()">✕</button>
+          </div>
+        </div>
+        <div>
+          <div class="stitle">INBOUND SIGNAL</div>
+          <canvas id="scopecv"></canvas>
+          <div id="progwrap">
+            <div class="plbl"><span id="plbltxt">STANDBY</span><span id="ppct">000%</span></div>
+            <div class="nixbar">
+              <div class="nixsegs" id="nixsegs"></div>
+              <div class="nixfill" id="nixfill"></div>
+              <div class="nixtxt" id="nixtxt">READY</div>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stbox"><span class="stval" id="stkbs">0</span><span class="stkey">KB/S</span></div>
+            <div class="stbox"><span class="stval" id="stchk">0</span><span class="stkey">CHUNKS</span></div>
+            <div class="stbox"><span class="stval" id="stkbr">0</span><span class="stkey">KB RX</span></div>
+          </div>
+          <div class="stitle">RECEIVED FILES</div>
+          <div id="recvd"><div style="color:var(--pdk);font-size:10px;padding:8px;text-align:center">NO INCOMING TRANSMISSIONS</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CEREBRO -->
+  <div class="panel" id="p-cr">
+    <div class="ph"><h2>CEREBRO-LINK</h2><span class="ptag">AES-256</span></div>
+    <div class="pb">
+      <div class="stitle">RADIO FREQUENCY KEY</div>
+      <div class="freqbox">
+        <span class="freqval" id="freqval">---.---</span>
+        <span class="frequnt">PASSPHRASE HASH // MHz</span>
+      </div>
+      <div class="fg">
+        <label class="fl">SHARED PASSPHRASE (RADIO FREQUENCY)</label>
+        <input class="fi" type="password" id="passphrase" placeholder="ENTER SHARED SECRET..." autocomplete="off" oninput="onPassChange()">
+      </div>
+      <button class="btn btn-g btn-w" onclick="deriveKey()">🔑 DERIVE CRYPTOGRAPHIC KEY</button>
+      <hr class="divider">
+      <div class="stitle">KEY MATERIAL</div>
+      <div class="keyvis">
+        <div class="keybars" id="keybars"></div>
+        <div class="keyhex" id="keyhex">[ KEY NOT YET DERIVED ]</div>
+      </div>
+      <hr class="divider">
+      <div class="stitle">CIPHER STATUS</div>
+      <div class="cdisp">
+        <div class="crow"><span class="ck">ALGORITHM</span><span class="cv ok">AES-256-GCM</span></div>
+        <div class="crow"><span class="ck">KEY DERIVATION</span><span class="cv ok">PBKDF2-SHA256</span></div>
+        <div class="crow"><span class="ck">ITERATIONS</span><span class="cv ok">310,000</span></div>
+        <div class="crow"><span class="ck">IV LENGTH</span><span class="cv ok">96-BIT</span></div>
+        <div class="crow"><span class="ck">TAG LENGTH</span><span class="cv ok">128-BIT</span></div>
+        <div class="crow"><span class="ck">KEY STATUS</span><span class="cv warn" id="kstatus">⚠ UNSET</span></div>
+        <div class="crow"><span class="ck">ENCRYPTED</span><span class="cv ok" id="cntenc">0</span></div>
+        <div class="crow"><span class="ck">DECRYPTED</span><span class="cv ok" id="cntdec">0</span></div>
+      </div>
+      <hr class="divider">
+      <div id="kszone">
+        <h3><span style="animation:pfast .8s infinite">⚠</span> MIND FLAYER KILL SWITCH</h3>
+        <p>DEMOGORGON DETECTED? PURGE ALL SESSION DATA, KEYS AND INDEXED STORAGE IMMEDIATELY.</p>
+        <button id="btnks" onclick="killSwitch()">☠ SUCK MY FAT ONE ☠</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPSIDE DOWN -->
+  <div class="panel" id="p-log">
+    <div class="ph">
+      <h2>UPSIDE DOWN</h2><span class="ptag">SECURE TELETYPE</span>
+      <button class="btn btn-sm btn-r" onclick="clearLog()" style="margin-left:auto">CLR</button>
+    </div>
+    <div class="pb" style="padding:8px">
+      <div id="termout">
+        <div class="ll"><span class="lt"></span><span class="lg info">[INIT]</span><span class="lm">PROJECT-001 TERMINAL ONLINE <span class="cblink"></span></span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- PANIC OVERLAY -->
+<div id="panic">
+  <div class="ptxt">PURGE COMPLETED</div>
+  <div class="psub">ALL SESSION DATA DESTROYED // DEMOGORGON NEUTRALIZED</div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════
+//  STATE
+// ═══════════════════════════════════
+const S = {
+  role: null, pc: null, dc: null,
+  cryptoKey: null, passphrase: '', keySalt: null,
+  connected: false, audioOn: true, termId: '',
+  encCount: 0, decCount: 0, totalXfr: 0,
+  sendQueue: [], rxBufs: {}, rxMeta: {},
+  txStats: { sent:0, recv:0, chunks:0, start:null },
+  scannedSDP: null,
+};
+const CHUNK = 16384, MAXBUF = 262144, DB = 'CerebroLink';
+
+// ═══════════════════════════════════
+//  AUDIO
+// ═══════════════════════════════════
+const Aud = (() => {
+  let ctx;
+  const ac = () => { if (!ctx) ctx = new (window.AudioContext||window.webkitAudioContext)(); return ctx; };
+  const beep = (f=440,d=.1,t='square',v=.1,delay=0) => {
+    if (!S.audioOn) return;
+    try {
+      const c=ac(),o=c.createOscillator(),g=c.createGain();
+      o.connect(g);g.connect(c.destination);o.type=t;
+      o.frequency.setValueAtTime(f,c.currentTime+delay);
+      g.gain.setValueAtTime(v,c.currentTime+delay);
+      g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+delay+d);
+      o.start(c.currentTime+delay);o.stop(c.currentTime+delay+d+.01);
+    } catch(e){}
+  };
+  const teletype = (n=3) => { for(let i=0;i<n;i++) beep(800+Math.random()*400,.04,'square',.05,i*.07); };
+  const hum = () => {
+    if(!S.audioOn)return;
+    try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';
+    o.frequency.setValueAtTime(60,c.currentTime);o.frequency.linearRampToValueAtTime(180,c.currentTime+.5);
+    o.frequency.linearRampToValueAtTime(120,c.currentTime+1.5);g.gain.setValueAtTime(.08,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+2);o.start(c.currentTime);o.stop(c.currentTime+2.1);}catch(e){}
+  };
+  const siren  = () => { for(let i=0;i<6;i++) beep(i%2===0?880:660,.15,'sawtooth',.15,i*.18); };
+  const chime  = () => { [523,659,784,1047].forEach((f,i)=>beep(f,.15,'sine',.1,i*.1)); };
+  const keyBeep= () => { [200,400,600,800,1000].forEach((f,i)=>beep(f,.08,'triangle',.08,i*.06)); };
+  const chunk  = () => beep(440+Math.random()*200,.02,'square',.02);
+  const kill   = () => {
+    if(!S.audioOn)return;
+    try{const c=ac(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sawtooth';
+    o.frequency.setValueAtTime(1200,c.currentTime);o.frequency.exponentialRampToValueAtTime(40,c.currentTime+1.5);
+    g.gain.setValueAtTime(.3,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+1.5);
+    o.start(c.currentTime);o.stop(c.currentTime+1.6);}catch(e){}
+  };
+  return { teletype, hum, siren, chime, keyBeep, chunk, kill };
+})();
+
+// ═══════════════════════════════════
+//  TERMINAL
+// ═══════════════════════════════════
+const Term = (() => {
+  const log = (msg, type='info') => {
+    const out=document.getElementById('termout'), n=new Date();
+    const t=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;
+    const tags={info:'[INFO]',warn:'[WARN]',error:'[ERR!]',crypto:'[CRYP]',transfer:'[XFER]',system:'[SYS!]'};
+    const d=document.createElement('div');d.className='ll';
+    d.innerHTML=`<span class="lt">${t}</span><span class="lg ${type}">${tags[type]||'[INFO]'}</span><span class="lm">${msg}</span>`;
+    out.appendChild(d);out.scrollTop=out.scrollHeight;Aud.teletype(1);
+  };
+  return { log };
+})();
+
+// ═══════════════════════════════════
+//  CRYPTO
+//  Fixed salt: both sides derive the same key from the same passphrase.
+//  Only the per-file IV is random — no salt exchange needed.
+// ═══════════════════════════════════
+const Cry = (() => {
+  // "HNL-CEREBRO-LINK-1984" as bytes — static, app-unique salt
+  const SALT = new Uint8Array([72,78,76,45,67,69,82,69,66,82,79,45,76,73,78,75,45,49,57,56,52]);
+
+  const derive = async (pass) => {
+    const enc = new TextEncoder();
+    const base = await crypto.subtle.importKey('raw', enc.encode(pass), {name:'PBKDF2'}, false, ['deriveKey']);
+    S.cryptoKey = await crypto.subtle.deriveKey(
+      {name:'PBKDF2', salt:SALT, iterations:310000, hash:'SHA-256'},
+      base, {name:'AES-GCM', length:256}, true, ['encrypt','decrypt']
+    );
+    return S.cryptoKey;
+  };
+
+  const encrypt = async (data) => {
+    if (!S.cryptoKey) throw new Error('No key — derive first');
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const enc = await crypto.subtle.encrypt({name:'AES-GCM', iv, tagLength:128}, S.cryptoKey, data);
+    document.getElementById('cntenc').textContent = ++S.encCount;
+    return {enc, iv};
+  };
+
+  const decrypt = async (data, iv) => {
+    if (!S.cryptoKey) throw new Error('No key — derive first on this device');
+    const dec = await crypto.subtle.decrypt({name:'AES-GCM', iv, tagLength:128}, S.cryptoKey, data);
+    document.getElementById('cntdec').textContent = ++S.decCount;
+    return dec;
+  };
+
+  const exportHex = async (key) => {
+    const raw = await crypto.subtle.exportKey('raw', key);
+    return Array.from(new Uint8Array(raw)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  };
+
+  return { derive, encrypt, decrypt, exportHex };
+})();
+
+// ═══════════════════════════════════
+//  SIGNALING + WEBRTC (AUTO LAN)
+// ═══════════════════════════════════
+let SIG = null; // WebSocket to signaling server
+
+const connectSignal = () => {
+  const url = document.getElementById('srvurl').value.trim();
+  if (!url) return;
+  if (SIG && SIG.readyState < 2) { SIG.close(); }
+
+  Term.log(`Connecting to signal node: ${url}`, 'system');
+  setSigStatus('connecting');
+
+  try { SIG = new WebSocket(url); }
+  catch(e) { Term.log(`WS error: ${e.message}`, 'error'); setSigStatus('error'); return; }
+
+  SIG.onopen = () => {
+    Term.log('Signal node connected', 'system');
+    setSigStatus('connected');
+    document.getElementById('btnJoin').disabled = false;
+    markStep(2, true);
+  };
+
+  SIG.onclose = () => {
+    Term.log('Signal node disconnected', 'warn');
+    setSigStatus('disconnected');
+    document.getElementById('btnJoin').disabled = true;
+  };
+
+  SIG.onerror = () => {
+    Term.log('Signal node error — is server.js running?', 'error');
+    setSigStatus('error');
+  };
+
+  SIG.onmessage = async (e) => {
+    let msg;
+    try { msg = JSON.parse(e.data); } catch { return; }
+    await handleSignal(msg);
+  };
+};
+
+const setSigStatus = (state) => {
+  const el = document.getElementById('siglbl');
+  const colors = { connected:'var(--amb)', connecting:'var(--p)', disconnected:'var(--red)', error:'var(--red)' };
+  const labels = { connected:'CONNECTED', connecting:'CONNECTING...', disconnected:'DISCONNECTED', error:'ERROR' };
+  el.textContent = labels[state] || state;
+  el.style.color = colors[state] || 'var(--pdim)';
+};
+
+const sigSend = (obj) => {
+  if (SIG && SIG.readyState === 1) SIG.send(JSON.stringify(obj));
+  else Term.log('Signal: not connected', 'warn');
+};
+
+const joinRoom = () => {
+  const code = document.getElementById('roomcode').value.trim().toUpperCase();
+  if (!code || code.length < 2) { Term.log('Enter a room code first', 'warn'); return; }
+  if (!SIG || SIG.readyState !== 1) { Term.log('Connect to signal node first', 'error'); return; }
+  sigSend({ type: 'join', code });
+  Term.log(`Joining room [${code}]...`, 'system');
+};
+
+const leaveRoom = () => {
+  sigSend({ type: 'leave' });
+  if (S.pc) { try { S.pc.close(); } catch(e){} S.pc = null; }
+  if (S.dc) { try { S.dc.close(); } catch(e){} S.dc = null; }
+  document.getElementById('roombox').style.display = 'none';
+  document.getElementById('peerstatuslbl').textContent = 'WAITING...';
+  document.getElementById('peerstatuslbl').style.color = 'var(--red)';
+  updateConnUI('disconnected');
+  Term.log('Left room', 'system');
+  markStep(3, false); markStep(4, false);
+};
+
+const handleSignal = async (msg) => {
+  switch(msg.type) {
+
+    case 'joined': {
+      S.role = msg.role; // 'initiator' or 'responder'
+      document.getElementById('roomlbl').textContent = document.getElementById('roomcode').value.toUpperCase();
+      document.getElementById('rolelbl').textContent = msg.role.toUpperCase();
+      document.getElementById('roombox').style.display = 'block';
+      document.getElementById('sigpeers').textContent = `${msg.peers}/2`;
+      Term.log(`Joined as ${msg.role.toUpperCase()} (${msg.peers}/2 peers)`, 'system');
+      markStep(3, msg.peers >= 2);
+
+      // If we're the initiator AND peer is already in room — start immediately
+      if (msg.role === 'initiator' && msg.peers === 2) {
+        Term.log('Peer already present — starting offer', 'info');
+        await doOffer();
+      }
+      break;
+    }
+
+    case 'peer-joined': {
+      document.getElementById('peerstatuslbl').textContent = 'PEER ONLINE';
+      document.getElementById('peerstatuslbl').style.color = 'var(--amb)';
+      document.getElementById('sigpeers').textContent = '2/2';
+      Term.log('Peer joined the room', 'system');
+      markStep(3, true);
+
+      // Only the initiator creates the offer
+      if (S.role === 'initiator') {
+        Term.log('Initiating offer...', 'info');
+        await doOffer();
+      }
+      break;
+    }
+
+    case 'peer-left': {
+      document.getElementById('peerstatuslbl').textContent = 'PEER OFFLINE';
+      document.getElementById('peerstatuslbl').style.color = 'var(--red)';
+      document.getElementById('sigpeers').textContent = '1/2';
+      Term.log('Peer left the room', 'warn');
+      updateConnUI('disconnected');
+      break;
+    }
+
+    case 'offer': {
+      Term.log('Received offer — generating answer...', 'info');
+      updateConnUI('connecting');
+      try {
+        const pc = mkPeer();
+        await pc.setRemoteDescription({ type: 'offer', sdp: msg.sdp });
+        await pc.setLocalDescription(await pc.createAnswer());
+        // ICE gathering — wait for completion then send answer
+        // (trickle ICE: also send candidates as they come)
+        Term.log('Answer ready — sending', 'info');
+      } catch(e) { Term.log(`Answer failed: ${e.message}`, 'error'); Aud.siren(); }
+      break;
+    }
+
+    case 'answer': {
+      Term.log('Received answer — setting remote desc', 'info');
+      try {
+        await S.pc.setRemoteDescription({ type: 'answer', sdp: msg.sdp });
+        Term.log('Remote answer set', 'info');
+      } catch(e) { Term.log(`Set answer failed: ${e.message}`, 'error'); Aud.siren(); }
+      break;
+    }
+
+    case 'ice': {
+      if (!msg.candidate) return;
+      try {
+        await S.pc?.addIceCandidate(new RTCIceCandidate(msg.candidate));
+      } catch(e) { /* ignore stale candidates */ }
+      break;
+    }
+
+    case 'error': {
+      Term.log(`Signal error: ${msg.msg}`, 'error');
+      Aud.siren();
+      break;
+    }
+  }
+};
+
+const mkPeer = () => {
+  if (S.pc) { try { S.pc.close(); } catch(e){} }
+
+  // Use Google STUN so LAN host candidates are gathered properly
+  const pc = new RTCPeerConnection({
+    
+    iceServers:[],
+    iceTransportPolicy:"all",
+    bundlePolicy:"max-bundle",
+    rtcpMuxPolicy:"require"
+  });
+
+  pc.onicecandidate = (e) => {
+    if (e.candidate) {
+      // Trickle ICE — send each candidate as it's found
+      sigSend({ type: 'ice', candidate: e.candidate });
+      Term.log(`ICE: ${e.candidate.type}//${e.candidate.protocol}`, 'info');
+    } else {
+      Term.log('ICE gathering complete', 'system');
+      // Also send the complete local description for non-trickle fallback
+      if (pc.localDescription) {
+        const type = pc.localDescription.type; // 'offer' or 'answer'
+        sigSend({ type, sdp: pc.localDescription.sdp });
+      }
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    Term.log(`Connection: ${pc.connectionState.toUpperCase()}`, 'system');
+    updateConnUI(pc.connectionState);
+    if (pc.connectionState === 'connected') markStep(4, false);
+  };
+
+  pc.ondatachannel = (e) => {
+    setupDC(e.channel);
+    Term.log('Incoming data channel accepted', 'system');
+  };
+
+  // If we are the initiator, create the data channel
+  if (S.role === 'initiator') {
+    const dc = pc.createDataChannel('cerebrolink', { ordered: true });
+    setupDC(dc);
+  }
+
+  S.pc = pc;
+  return pc;
+};
+
+const doOffer = async () => {
+  try {
+    updateConnUI('connecting');
+    const pc = mkPeer();
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    Term.log('Offer created — gathering ICE...', 'info');
+    // trickle ICE: the onicecandidate handler will send candidates + final SDP
+  } catch(e) { Term.log(`Offer failed: ${e.message}`, 'error'); Aud.siren(); }
+};
+
+const setupDC = (dc) => {
+  dc.binaryType = 'arraybuffer'; S.dc = dc;
+  dc.onopen = () => {
+    Term.log('DATA CHANNEL OPEN // CEREBRO-LINK ESTABLISHED', 'system');
+    Aud.hum(); Aud.chime(); updateConnUI('connected');
+    markStep(3, true); markStep(4, false);
+    document.getElementById('peerstatuslbl').textContent = 'LINK OPEN';
+    document.getElementById('peerstatuslbl').style.color = 'var(--amb)';
+  };
+  dc.onclose = () => { Term.log('Data channel closed', 'warn'); updateConnUI('disconnected'); };
+  dc.onerror = (e) => { Term.log(`Channel error: ${e.error?.message||'unknown'}`, 'error'); Aud.siren(); };
+  dc.onmessage = (e) => handleMsg(e.data);
+};
+
+// ═══════════════════════════════════
+//  FILE TRANSFER
+// ═══════════════════════════════════
+const sendFile = (file) => new Promise(async (resolve, reject) => {
+  if(!S.dc||S.dc.readyState!=='open'){Term.log('No open channel','error');Aud.siren();reject();return;}
+  if(!S.cryptoKey){Term.log('No crypto key','error');Aud.siren();reject();return;}
+  Term.log(`Encrypting: ${file.name} (${fmt(file.size)})`,'crypto');
+  let enc, iv;
+  try { ({enc,iv}=await Cry.encrypt(await file.arrayBuffer())); }
+  catch(e){Term.log(`Encrypt failed: ${e.message}`,'error');Aud.siren();reject(e);return;}
+  Term.log(`Encrypted // IV: ${Array.from(iv).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,16)}...`,'crypto');
+  const meta={type:'file-meta',name:file.name,size:enc.byteLength,originalSize:file.size,
+    iv:Array.from(iv),totalChunks:Math.ceil(enc.byteLength/CHUNK),
+    mimeType:file.type||'application/octet-stream'};
+  S.dc.send(JSON.stringify(meta));
+  Term.log(`Sending ${meta.totalChunks} chunks // ${fmt(enc.byteLength)} encrypted`,'transfer');
+  const data=new Uint8Array(enc);
+  let off=0,idx=0;
+  S.txStats.start=Date.now();
+  const next=()=>{
+    if(off>=data.byteLength){
+      S.dc.send(JSON.stringify({type:'file-end',name:file.name}));
+      Term.log(`Complete: ${file.name}`,'transfer');
+      Aud.chime();S.totalXfr++;document.getElementById('sxfr').textContent=S.totalXfr;
+      setProg(100,'TRANSMITTED');
+      resolve(); // ← properly resolve so the next file can start
+      return;
+    }
+    if(S.dc.bufferedAmount>MAXBUF){setTimeout(next,50);return;}
+    const ch=data.slice(off,off+CHUNK);
+    const msg=new Uint8Array(4+ch.length);
+    new DataView(msg.buffer).setUint32(0,idx,false);msg.set(ch,4);
+    S.dc.send(msg.buffer);
+    off+=CHUNK;idx++;S.txStats.sent+=ch.length;S.txStats.chunks++;
+    setProg(Math.round(off/data.byteLength*100),`CHUNK ${idx}/${meta.totalChunks}`);
+    updStats();if(idx%5===0)Aud.chunk();
+    setTimeout(next,0); // ← use setTimeout instead of rAF so await can resolve
+  };
+  next();
+});
+
+const handleMsg = (data) => {
+  if(typeof data==='string'){
+    try{
+      const msg=JSON.parse(data);
+      if(msg.type==='file-meta'){
+        S.rxBufs[msg.name]={chunks:{},got:0,total:msg.totalChunks};
+        S.rxMeta[msg.name]=msg;
+        Term.log(`Incoming: ${msg.name} // ${msg.totalChunks} chunks`,'transfer');
+        S.txStats.start=Date.now();setProg(0,`RECEIVING ${msg.name}`);Aud.hum();
+      } else if(msg.type==='file-end'){
+        reassemble(msg.name);
+      }
+    }catch(e){}
+  } else {
+    const ci=new DataView(data).getUint32(0,false);
+    const name=Object.keys(S.rxBufs).find(n=>!S.rxBufs[n].done);
+    if(!name)return;
+    const buf=S.rxBufs[name];
+    buf.chunks[ci]=new Uint8Array(data.slice(4));
+    buf.got++;S.txStats.recv+=data.byteLength-4;
+    setProg(Math.round(buf.got/buf.total*100),`CHUNK ${buf.got}/${buf.total}`);
+    updStats();
+  }
+};
+
+const reassemble = async (name) => {
+  const buf=S.rxBufs[name],meta=S.rxMeta[name];
+  buf.done=true;
+  let sz=0;for(let i=0;i<meta.totalChunks;i++)sz+=buf.chunks[i].byteLength;
+  const combined=new Uint8Array(sz);let off=0;
+  for(let i=0;i<meta.totalChunks;i++){combined.set(buf.chunks[i],off);off+=buf.chunks[i].byteLength;}
+  Term.log(`Reassembled ${fmt(sz)} // decrypting`,'crypto');
+  setProg(100,'DECRYPTING');
+  try{
+    const dec=await Cry.decrypt(combined.buffer,new Uint8Array(meta.iv));
+    Term.log(`Decrypted: ${fmt(dec.byteLength)} // ${meta.name}`,'crypto');
+    Aud.chime();
+    await saveIDB(meta.name,dec,meta.mimeType);
+    addReceived(meta.name,dec.byteLength,dec,meta.mimeType);
+    setProg(100,'DECRYPTED ✓');
+    S.totalXfr++;document.getElementById('sxfr').textContent=S.totalXfr;
+  }catch(e){Term.log(`Decryption FAILED: ${e.message}`,'error');Aud.siren();setProg(0,'DECRYPT FAIL ✗');}
+};
+
+// ═══════════════════════════════════
+//  INDEXED DB
+// ═══════════════════════════════════
+const saveIDB=(name,data,mime)=>new Promise((res,rej)=>{
+  const r=indexedDB.open(DB,1);
+  r.onupgradeneeded=e=>e.target.result.createObjectStore('files',{keyPath:'name'});
+  r.onsuccess=e=>{const tx=e.target.result.transaction('files','readwrite');
+    tx.objectStore('files').put({name,data,mime,ts:Date.now()});
+    tx.oncomplete=res;tx.onerror=()=>rej(tx.error);};
+  r.onerror=()=>rej(r.error);
+});
+const wipeIDB=()=>new Promise(res=>{const r=indexedDB.deleteDatabase(DB);r.onsuccess=r.onerror=res;});
+
+// ═══════════════════════════════════
+//  OSCILLOSCOPE
+// ═══════════════════════════════════
+const Scope=(()=>{
+  const cv=document.getElementById('scopecv'),ctx=cv.getContext('2d');
+  let ph=0,conn=false;
+  const draw=()=>{
+    const W=cv.offsetWidth,H=cv.offsetHeight;cv.width=W;cv.height=H;
+    ctx.fillStyle='#020402';ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(0,255,65,.06)';ctx.lineWidth=.5;
+    for(let x=0;x<W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+    ctx.strokeStyle=conn?'rgba(0,255,65,.8)':'rgba(0,255,65,.25)';
+    ctx.lineWidth=1.5;ctx.shadowColor='#00ff41';ctx.shadowBlur=conn?6:2;ctx.beginPath();
+    for(let x=0;x<W;x++){
+      const a=(conn?(H/2-4)*.7:(H/2-4)*.2),n=conn?(Math.random()-.5)*3:0;
+      const y=H/2+Math.sin((x/W)*Math.PI*2*(conn?4:1)+ph)*a+n;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.stroke();ph+=conn?.08:.02;requestAnimationFrame(draw);
+  };
+  draw();return{set:v=>conn=v};
+})();
+
+// ═══════════════════════════════════
+//  QR (kept for potential future use)
+// ═══════════════════════════════════
+const genQR=(data)=>{
+  const el=document.getElementById('qrdisplay');if(!el)return;el.innerHTML='';
+  try{new QRCode(el,{text:data,width:200,height:200,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});}
+  catch(e){}
+};
+
+// ═══════════════════════════════════
+//  KILL SWITCH
+// ═══════════════════════════════════
+const killSwitch=async()=>{
+  Term.log('KILL SWITCH ACTIVATED // PURGING','error');Aud.kill();
+  const ov=document.getElementById('panic');ov.classList.add('active');ov.style.background='rgba(255,34,0,.15)';
+  if(S.dc)try{S.dc.close()}catch(e){}
+  if(S.pc)try{S.pc.close()}catch(e){}
+  if(SIG)try{SIG.close()}catch(e){}
+  S.cryptoKey=null;S.pc=null;S.dc=null;S.passphrase='';S.rxBufs={};S.rxMeta={};S.sendQueue=[];S.keySalt=null;
+  await wipeIDB();
+  try{sessionStorage.clear();localStorage.clear();}catch(e){}
+  document.getElementById('passphrase').value='';
+  document.getElementById('keyhex').textContent='[ PURGED ]';
+  document.getElementById('fqueue').innerHTML='';
+  document.getElementById('recvd').innerHTML='<div style="color:var(--red);font-size:10px;padding:8px;text-align:center">[ PURGED ]</div>';
+  document.getElementById('kstatus').textContent='☠ PURGED';document.getElementById('kstatus').className='cv err';
+  document.getElementById('freqval').textContent='☠☠☠.☠☠☠';document.getElementById('keybars').innerHTML='';
+  setSigStatus('disconnected');
+  Term.log('PURGE COMPLETE // ALL EVIDENCE DESTROYED','error');
+  updateConnUI('disconnected');Scope.set(false);
+  setTimeout(()=>ov.classList.remove('active'),3000);
+};
+
+// ═══════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════
+const updateConnUI=(state)=>{
+  const dot=document.getElementById('cdot'),lbl=document.getElementById('clbl');
+  dot.className='dot';
+  const m={connected:{d:'connected',l:'LINK ESTABLISHED',c:'OPEN',s:'ACTIVE'},
+    connecting:{d:'connecting',l:'NEGOTIATING...',c:'OPENING',s:'HANDSHAKE'},
+    disconnected:{d:'',l:'AWAITING HANDSHAKE',c:'CLOSED',s:'IDLE'},
+    error:{d:'error',l:'CONNECTION ERROR',c:'ERROR',s:'ERROR'},
+    failed:{d:'error',l:'ICE FAILED',c:'FAILED',s:'ERROR'}};
+  const v=m[state]||m.disconnected;
+  if(v.d)dot.classList.add(v.d);
+  lbl.textContent=v.l;
+  document.getElementById('schan').textContent=v.c;
+  document.getElementById('smode').textContent=v.s;
+  S.connected=state==='connected';Scope.set(S.connected);
+  document.getElementById('speer').textContent=S.connected?'PEER-001':'NONE';
+};
+
+const setProg=(pct,lbl='')=>{
+  document.getElementById('nixfill').style.width=pct+'%';
+  document.getElementById('ppct').textContent=String(Math.round(pct)).padStart(3,'0')+'%';
+  document.getElementById('nixtxt').textContent=lbl||(pct+'%');
+  document.getElementById('plbltxt').textContent=lbl;
+};
+
+const updStats=()=>{
+  const el=(Date.now()-(S.txStats.start||Date.now()))/1000||1;
+  const tot=S.txStats.sent+S.txStats.recv;
+  document.getElementById('stkbs').textContent=Math.round(tot/el/1024);
+  document.getElementById('stchk').textContent=S.txStats.chunks;
+  document.getElementById('stkbr').textContent=Math.round(S.txStats.recv/1024);
+};
+
+const addReceived=(name,size,data,mime)=>{
+  const el=document.getElementById('recvd');
+  if(el.querySelector('[style*="NO INCOMING"]'))el.innerHTML='';
+  const d=document.createElement('div');d.className='ritem';
+  d.innerHTML=`<span style="font-family:var(--fd);font-size:16px;color:var(--amb)">🔓</span><span class="riname">${name}</span><span class="risize">${fmt(size)}</span>`;
+  d.onclick=()=>{const b=new Blob([data],{type:mime}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);Term.log(`Downloaded: ${name}`,'info');};
+  el.prepend(d);
+};
+
+const markStep=(n,done)=>{const el=document.getElementById(`s${n}n`);if(el)el.style.color=done?'var(--p)':'var(--amb)';};
+const fmt=(b)=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(2)+' MB';
+
+// ═══════════════════════════════════
+//  USER ACTIONS
+// ═══════════════════════════════════
+//  USER ACTIONS
+// ═══════════════════════════════════
+const clearLog=()=>{document.getElementById('termout').innerHTML='';Term.log('Log cleared','info');};
+const onPassChange=()=>{
+  S.passphrase=document.getElementById('passphrase').value;
+  const v=S.passphrase;
+  if(v.length>0){let h=0;for(let i=0;i<v.length;i++)h=(h*31+v.charCodeAt(i))&0xFFFFFF;document.getElementById('freqval').textContent=(88+(h%800)/10).toFixed(3);}
+  else document.getElementById('freqval').textContent='---.---';
+};
+const deriveKey=async()=>{
+  const pass=document.getElementById('passphrase').value;
+  S.passphrase=pass;
+  if(!pass||pass.length<4){Term.log('Passphrase too short','warn');Aud.siren();return;}
+  Term.log('Deriving key via PBKDF2-SHA256 // 310,000 iterations...','crypto');
+  document.getElementById('kstatus').textContent='⏳ DERIVING...';document.getElementById('kstatus').className='cv warn';
+  try{
+    const key=await Cry.derive(pass),hex=await Cry.exportHex(key);
+    document.getElementById('keyhex').textContent=hex.match(/.{1,8}/g).join(' ');
+    document.getElementById('kstatus').textContent='✓ ACTIVE';document.getElementById('kstatus').className='cv ok';
+    document.getElementById('scryp').textContent='AES-256-GCM';
+    const bars=document.getElementById('keybars');bars.innerHTML='';
+    for(let i=0;i<32;i++){const b=document.createElement('div');b.className='keybar';const h=4+(parseInt(hex.slice(i*2,i*2+2),16)/255)*16;b.style.height=h+'px';b.style.background=`hsl(${120+(h/20)*40},100%,40%)`;bars.appendChild(b);}
+    Aud.keyBeep();Term.log(`Key derived // ${hex.slice(0,16)}...${hex.slice(-8)}`,'crypto');markStep(1,true);
+  }catch(e){Term.log(`Key derivation failed: ${e.message}`,'error');Aud.siren();}
+};
+
+const handleFileSelect=e=>addToQueue(Array.from(e.target.files));
+const handleDragOver=e=>{e.preventDefault();document.getElementById('dropz').classList.add('dragover');};
+const handleDragLeave=()=>document.getElementById('dropz').classList.remove('dragover');
+const handleDrop=e=>{e.preventDefault();document.getElementById('dropz').classList.remove('dragover');addToQueue(Array.from(e.dataTransfer.files));};
+const addToQueue=files=>{
+  files.forEach(f=>{
+    S.sendQueue.push(f);
+    const d=document.createElement('div');d.className='fitem';d.dataset.name=f.name;
+    d.innerHTML=`<span class="fico">⬡</span><div class="finfo"><div class="fname">${f.name}</div><div class="fsize">${fmt(f.size)} // ${f.type||'unknown'}</div></div><span class="frem" onclick="removeQ('${f.name}')">✕</span>`;
+    document.getElementById('fqueue').appendChild(d);Term.log(`Queued: ${f.name} (${fmt(f.size)})`,'info');
+  });
+};
+const removeQ=name=>{S.sendQueue=S.sendQueue.filter(f=>f.name!==name);document.querySelector(`.fitem[data-name="${name}"]`)?.remove();};
+const clearQueue=()=>{S.sendQueue=[];document.getElementById('fqueue').innerHTML='';};
+const sendFiles=async()=>{
+  if(!S.sendQueue.length){Term.log('Queue empty','warn');return;}
+  if(!S.cryptoKey){Term.log('Derive crypto key first','error');Aud.siren();return;}
+  if(!S.dc||S.dc.readyState!=='open'){Term.log('No open channel','error');Aud.siren();return;}
+  markStep(4,true);
+  // Snapshot the queue then clear it so new files can be added mid-transfer
+  const queue=[...S.sendQueue];
+  S.sendQueue=[];
+  document.getElementById('fqueue').innerHTML='';
+  // Reset file input so the same file can be re-selected next time
+  const fi=document.getElementById('filein');fi.value='';
+  Term.log(`Transmitting ${queue.length} file(s)...`,'transfer');
+  for(const f of queue){
+    try { await sendFile(f); }
+    catch(e){ Term.log(`Failed: ${f.name}`,'error'); }
+  }
+  Term.log('All queued files transmitted','transfer');
+  setProg(0,'READY');
+};
+
+// ═══════════════════════════════════
+//  DEMOGORGON ALERT
+// ═══════════════════════════════════
+const triggerDemogorgon = () => {
+  const el = document.getElementById('demogorgon-alert');
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+};
+
+// ═══════════════════════════════════
+//  NIXIE SETUP
+// ═══════════════════════════════════
+const setupNixie=()=>{const el=document.getElementById('nixsegs');for(let i=0;i<40;i++){const s=document.createElement('div');s.className='nixseg';el.appendChild(s);}};
+
+// ═══════════════════════════════════
+//  CLOCK
+// ═══════════════════════════════════
+const startClock=()=>{
+  const tick=()=>{const n=new Date();document.getElementById('clock').textContent=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}:${String(n.getSeconds()).padStart(2,'0')}`;};
+  tick();setInterval(tick,1000);
+};
+
+// ═══════════════════════════════════
+//  PWA
+// ═══════════════════════════════════
+const setupPWA=()=>{
+  const m={name:"CEREBRO-LINK",short_name:"CEREBRO",start_url:"./",display:"standalone",background_color:"#050a05",theme_color:"#00ff41",
+    icons:[{src:"data:image/svg+xml;base64,"+btoa(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23050a05'/><text x='96' y='140' font-size='120' text-anchor='middle' fill='%2300ff41'>⬡</text></svg>`),sizes:"192x192",type:"image/svg+xml"}]};
+  document.getElementById('pwa-manifest').href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/json'}));
+};
+const registerSW=async()=>{
+  if(!('serviceWorker'in navigator))return;
+  const sw=`const C='cerebro-v1';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./'])));self.skipWaiting()});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim()});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});`;
+  try{
+    await navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})),{scope:'./'});
+    Term.log('Service Worker registered // offline mode active','system');
+    document.getElementById('pwabadge').textContent='PWA: ONLINE';document.getElementById('pwabadge').className='badge bg';
+  }catch(e){Term.log(`SW: ${e.message}`,'warn');}
+};
+
+document.getElementById('btnaudio').onclick=()=>{S.audioOn=!S.audioOn;document.getElementById('btnaudio').textContent=S.audioOn?'🔊 AUDIO: ON':'🔇 AUDIO: OFF';};
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='K'){e.preventDefault();killSwitch();}});
+
+// ═══════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════
+const genId=()=>{const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let id='HNL-';for(let i=0;i<6;i++)id+=c[Math.floor(Math.random()*c.length)];return id;};
+
+window.addEventListener('load',async()=>{
+  S.termId=genId();document.getElementById('tid').textContent=S.termId;
+  startClock();setupNixie();setupPWA();
+  updateConnUI('disconnected');setProg(0,'READY');
+  const msgs=[
+    ['Initializing CEREBRO-LINK v2.0.0...','system'],
+    [`Terminal ID: ${S.termId}`,'system'],
+    ['Web Crypto API: AVAILABLE','crypto'],
+    ['AES-256-GCM cipher: LOADED','crypto'],
+    ['PBKDF2-SHA256 // 310,000 iterations: READY','crypto'],
+    ['RTCPeerConnection: INITIALIZED','info'],
+    ['WebSocket signaling client: READY','info'],
+    ['DataChannel // CEREBROLINK/2.0: READY','info'],
+    ['IndexedDB storage: ACCESSIBLE','info'],
+    ['Scanning for Upside Down energy signatures...','warn'],
+    ['ANOMALY DETECTED — Gate activity on sublevel 3','warn'],
+    ['MIND FLAYER KILL SWITCH: ARMED','warn'],
+    ['ACTION: run server.js → enter server IP → join room code','system'],
+    ['Waiting for signal node connection...','system'],
+  ];
+  for(const[m,t]of msgs){await new Promise(r=>setTimeout(r,100+Math.random()*80));Term.log(m,t);}
+  await registerSW();
+  Term.log('SYSTEM READY // ENTER PASSPHRASE AND SELECT ROLE','system');
+});
+</script>
+</body>
+</html>
