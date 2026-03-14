@@ -1,177 +1,142 @@
 /**
- * CEREBRO-LINK // HAWKINS NATIONAL LABORATORY
- * WebSocket Signaling Server — Node.js
+ * CEREBRO-LINK // HAWKINS LAB SIGNALING SERVER
+ * ─────────────────────────────────────────────
+ * Tiny WebSocket relay for WebRTC SDP + ICE exchange on LAN.
+ * No files, no data pass through here — only signaling messages.
  *
- * Handles WebRTC room-based signaling:
- *   - Room creation & joining
- *   - SDP offer/answer relay
- *   - ICE candidate exchange
- *   - Peer disconnect cleanup
+ * Install:  npm install ws
+ * Run:      node server.js
+ * Default:  ws://YOUR_LAN_IP:3742
  */
 
 'use strict';
 
 const { WebSocketServer } = require('ws');
-const http  = require('http');
-const path  = require('path');
-const fs    = require('fs');
+const os   = require('os');
+const PORT = process.env.PORT || 3742;
 
-// ─── Config ────────────────────────────────────────────────
-const PORT     = process.env.PORT || 3000;
-const MAX_ROOM = 2;          // exactly 2 peers per room
-const ROOMS    = new Map();  // roomCode → Set<ws>
+const wss = new WebSocketServer({ port: PORT });
 
-// ─── Static file server ────────────────────────────────────
-const MIME = {
-  '.html': 'text/html',
-  '.js':   'text/javascript',
-  '.css':  'text/css',
-  '.json': 'application/json',
-  '.ico':  'image/x-icon',
-  '.svg':  'image/svg+xml',
-};
+// rooms: Map<roomCode, Set<WebSocket>>
+const rooms = new Map();
 
-const httpServer = http.createServer((req, res) => {
-  let filePath = path.join(__dirname, 'public',
-    req.url === '/' ? 'index.html' : req.url);
-
-  const ext  = path.extname(filePath);
-  const mime = MIME[ext] || 'application/octet-stream';
-
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 — Not Found');
-      return;
+// ── helpers ────────────────────────────────────────────────
+const getLanIP = () => {
+  for (const ifaces of Object.values(os.networkInterfaces())) {
+    for (const i of ifaces) {
+      if (i.family === 'IPv4' && !i.internal) return i.address;
     }
-    res.writeHead(200, { 'Content-Type': mime });
-    res.end(data);
-  });
-});
-
-// ─── WebSocket server ──────────────────────────────────────
-const wss = new WebSocketServer({ server: httpServer });
-
-// Helper: send JSON safely
-const send = (ws, obj) => {
-  if (ws.readyState === ws.OPEN)
-    ws.send(JSON.stringify(obj));
-};
-
-// Helper: get the other peer in the room
-const other = (room, ws) => {
-  for (const peer of room) {
-    if (peer !== ws) return peer;
   }
-  return null;
+  return 'localhost';
 };
 
-wss.on('connection', (ws, req) => {
-  const ip = req.socket.remoteAddress;
-  console.log(`[CONNECT] ${ip}`);
+const send = (ws, obj) => {
+  if (ws.readyState === 1) ws.send(JSON.stringify(obj));
+};
 
+const broadcast = (room, obj, except = null) => {
+  const members = rooms.get(room) || new Set();
+  for (const ws of members) {
+    if (ws !== except) send(ws, obj);
+  }
+};
+
+const log = (msg) => console.log(`[${new Date().toTimeString().slice(0,8)}] ${msg}`);
+
+// ── connection handler ─────────────────────────────────────
+wss.on('connection', (ws) => {
   ws._room = null;
+  log('Client connected');
 
   ws.on('message', (raw) => {
     let msg;
-    try { msg = JSON.parse(raw); }
-    catch { return; }
+    try { msg = JSON.parse(raw); } catch { return; }
 
-    const { type, room: roomCode, payload } = msg;
+    switch (msg.type) {
 
-    // ── JOIN ────────────────────────────────────────────────
-    if (type === 'join') {
-      if (!roomCode) return send(ws, { type: 'error', payload: 'No room code' });
+      // Client joins a room (the 6-char code both devices type in)
+      case 'join': {
+        const code = String(msg.code || '').toUpperCase().trim();
+        if (!code || code.length < 4) return;
 
-      if (!ROOMS.has(roomCode)) ROOMS.set(roomCode, new Set());
-      const room = ROOMS.get(roomCode);
+        // Leave old room if already in one
+        if (ws._room) {
+          rooms.get(ws._room)?.delete(ws);
+        }
 
-      if (room.size >= MAX_ROOM) {
-        return send(ws, { type: 'error', payload: 'Room full' });
+        if (!rooms.has(code)) rooms.set(code, new Set());
+        const room = rooms.get(code);
+
+        if (room.size >= 2) {
+          send(ws, { type: 'error', msg: 'ROOM FULL — MAX 2 DEVICES' });
+          return;
+        }
+
+        room.add(ws);
+        ws._room = code;
+        ws._role = room.size === 1 ? 'initiator' : 'responder';
+
+        send(ws, { type: 'joined', role: ws._role, peers: room.size });
+        log(`${ws._role} joined room [${code}]  (${room.size}/2)`);
+
+        // Tell the initiator that a peer arrived
+        if (room.size === 2) {
+          broadcast(code, { type: 'peer-joined' }, ws);
+          log(`Room [${code}] is now full — handshake can begin`);
+        }
+        break;
       }
 
-      room.add(ws);
-      ws._room = roomCode;
-
-      const isFirst = room.size === 1;
-      send(ws, {
-        type:  'joined',
-        payload: { role: isFirst ? 'offer' : 'answer', peers: room.size }
-      });
-
-      console.log(`[JOIN] room=${roomCode} peers=${room.size} ip=${ip}`);
-
-      // Notify the other peer that someone joined
-      if (!isFirst) {
-        const peer = other(room, ws);
-        if (peer) send(peer, { type: 'peer-joined' });
+      // Relay offer / answer / ice-candidate — just forward to the other peer
+      case 'offer':
+      case 'answer':
+      case 'ice': {
+        if (!ws._room) return;
+        broadcast(ws._room, msg, ws);
+        break;
       }
-      return;
+
+      // Graceful leave
+      case 'leave': {
+        if (ws._room) {
+          rooms.get(ws._room)?.delete(ws);
+          broadcast(ws._room, { type: 'peer-left' });
+          log(`Peer left room [${ws._room}]`);
+          ws._room = null;
+        }
+        break;
+      }
     }
-
-    // ── Relay messages (offer / answer / ice) ───────────────
-    if (['offer', 'answer', 'ice'].includes(type)) {
-      if (!ws._room) return;
-      const room = ROOMS.get(ws._room);
-      if (!room)    return;
-      const peer = other(room, ws);
-      if (!peer)    return send(ws, { type: 'error', payload: 'Peer not connected yet' });
-
-      send(peer, { type, payload });
-      return;
-    }
-
-    // ── PING ────────────────────────────────────────────────
-    if (type === 'ping') {
-      send(ws, { type: 'pong' });
-      return;
-    }
-
-    console.log(`[UNKNOWN] type=${type}`);
   });
 
-  // ── Disconnect ───────────────────────────────────────────
   ws.on('close', () => {
-    console.log(`[DISCONNECT] ${ip}`);
-    if (!ws._room) return;
-    const room = ROOMS.get(ws._room);
-    if (!room) return;
-
-    room.delete(ws);
-    const peer = other(room, ws);
-    if (peer) send(peer, { type: 'peer-left' });
-
-    if (room.size === 0) {
-      ROOMS.delete(ws._room);
-      console.log(`[ROOM CLOSED] ${ws._room}`);
+    if (ws._room) {
+      rooms.get(ws._room)?.delete(ws);
+      broadcast(ws._room, { type: 'peer-left' });
+      // Clean up empty rooms
+      if (rooms.get(ws._room)?.size === 0) rooms.delete(ws._room);
+      log(`Client disconnected from room [${ws._room}]`);
+    } else {
+      log('Client disconnected (no room)');
     }
   });
 
-  ws.on('error', (e) => console.error(`[WS ERROR] ${e.message}`));
+  ws.on('error', (e) => log(`WS error: ${e.message}`));
 });
 
-// ─── Boot ──────────────────────────────────────────────────
-httpServer.listen(PORT, () => {
-  const ifaces = require('os').networkInterfaces();
-  let lan = 'localhost';
-  Object.values(ifaces).flat().forEach(i => {
-    if (i.family === 'IPv4' && !i.internal) lan = i.address;
-  });
-
-  console.log('');
-  console.log('  ██████╗███████╗██████╗ ███████╗██████╗ ██████╗  ██████╗ ');
-  console.log(' ██╔════╝██╔════╝██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔═══██╗');
-  console.log(' ██║     █████╗  ██████╔╝█████╗  ██████╔╝██████╔╝██║   ██║');
-  console.log(' ██║     ██╔══╝  ██╔══██╗██╔══╝  ██╔══██╗██╔══██╗██║   ██║');
-  console.log(' ╚██████╗███████╗██║  ██║███████╗██████╔╝██║  ██║╚██████╔╝');
-  console.log('  ╚═════╝╚══════╝╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ');
-  console.log('');
-  console.log(`  HAWKINS NATIONAL LABORATORY — SIGNAL NODE ACTIVE`);
-  console.log(`  ─────────────────────────────────────────────────`);
-  console.log(`  Local:   ws://localhost:${PORT}`);
-  console.log(`  Network: ws://${lan}:${PORT}`);
-  console.log(`  Static:  http://${lan}:${PORT}`);
-  console.log(`  ─────────────────────────────────────────────────`);
-  console.log(`  Use Network URL in the browser's "Signal Node" field`);
-  console.log('');
-});
+// ── startup banner ─────────────────────────────────────────
+const ip = getLanIP();
+console.log(`
+╔══════════════════════════════════════════════════╗
+║   CEREBRO-LINK // HAWKINS LAB SIGNALING NODE     ║
+╠══════════════════════════════════════════════════╣
+║  Status  : ONLINE                                ║
+║  LAN IP  : ${ip.padEnd(38)}║
+║  Port    : ${String(PORT).padEnd(38)}║
+║  URL     : ws://${ip}:${PORT}${' '.repeat(Math.max(0,30-ip.length-String(PORT).length))}║
+╠══════════════════════════════════════════════════╣
+║  Open cerebro-link-st.html on BOTH laptops.      ║
+║  Enter the same 6-char room code on each.        ║
+║  No data passes through this server.             ║
+╚══════════════════════════════════════════════════╝
+`);
